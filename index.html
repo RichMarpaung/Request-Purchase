@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Request Barang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 p-4 md:p-8 min-h-screen font-sans">
+
+    <div class="max-w-5xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Tracking Request</h1>
+                <p class="text-slate-500 mt-1 text-sm">Pantau status pesanan barang di sini.</p>
+            </div>
+            <button onclick="fetchData()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-sm text-sm font-medium transition-colors flex items-center gap-2">
+                <span>🔄</span> Segarkan Data
+            </button>
+        </div>
+
+        <div class="mb-8">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-slate-400">🔍</span>
+                </div>
+                <input type="text" id="searchInput" placeholder="Cari ID Tiket, Nama Requester, atau Area..." 
+                    class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm transition-all">
+            </div>
+        </div>
+
+        <div id="ticketContainer" class="space-y-4">
+            <p class="text-center text-slate-500 py-10">Memuat data request...</p>
+        </div>
+    </div>
+
+    <script>
+        // MASUKKAN URL APLIKASI WEB KAMU DI SINI
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnDCjJMFOx5RA8XSA_VLigDlJFl7Io5l4b5uO00QsoZUHCkLDDQJ4mT7hybVDG1C0P5g/exec';
+        
+        // Variabel global untuk menyimpan data asli agar bisa difilter oleh fitur Search
+        let allTickets = []; 
+
+        // Fungsi mengambil data dari API
+        async function fetchData() {
+            const container = document.getElementById('ticketContainer');
+            container.innerHTML = '<p class="text-center text-slate-500 py-10 animate-pulse">Sedang mengambil data terbaru...</p>';
+            
+            try {
+                const response = await fetch(SCRIPT_URL);
+                allTickets = await response.json(); // Simpan ke variabel global
+                
+                renderTickets(allTickets); // Tampilkan data
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                container.innerHTML = '<p class="text-center text-red-500 font-medium py-10">Gagal mengambil data. Pastikan URL Apps Script sudah benar.</p>';
+            }
+        }
+
+        // Fungsi untuk merender HTML Tiket berdasarkan data yang diberikan
+        function renderTickets(data) {
+            const container = document.getElementById('ticketContainer');
+            container.innerHTML = ''; // Kosongkan wadah
+
+            if(data.length === 0) {
+                container.innerHTML = '<div class="text-center bg-white p-10 rounded-xl border border-slate-200 text-slate-500 shadow-sm">Tidak ada tiket yang ditemukan.</div>';
+                return;
+            }
+
+            data.forEach((tiket, index) => {
+                // Generate isi tabel barang
+                let itemsHTML = '';
+                tiket.items.forEach(item => {
+                    let statusColor = 'bg-amber-100 text-amber-800 border-amber-200'; // Menunggu
+                    if(item.status.toLowerCase() === 'diproses') statusColor = 'bg-blue-100 text-blue-800 border-blue-200';
+                    if(item.status.toLowerCase() === 'selesai') statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+
+                    itemsHTML += `
+                        <tr class="border-b last:border-0 hover:bg-slate-50/50 transition-colors">
+                            <td class="py-3 px-4 font-medium text-slate-700">${item.namaBarang}</td>
+                            <td class="py-3 px-4 text-slate-600">${item.qty}</td>
+                            <td class="py-3 px-4 text-slate-600">${item.vendor}</td>
+                            <td class="py-3 px-4 text-slate-600 text-right">
+                                <span class="px-2.5 py-1 text-[11px] uppercase tracking-wider font-bold rounded-full border ${statusColor}">
+                                    ${item.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                // ID Unik untuk setiap tabel barang (agar bisa di-toggle/dropdown)
+                const detailId = `detail-${tiket.ticketId}`;
+                const iconId = `icon-${tiket.ticketId}`;
+
+                // Susun HTML Tiket
+                const cardHTML = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md">
+                        
+                        <div onclick="toggleDetail('${detailId}', '${iconId}')" class="bg-white p-5 flex flex-col md:flex-row justify-between items-start md:items-center cursor-pointer select-none group">
+                            
+                            <div class="flex-1 w-full">
+                                <div class="flex items-center justify-between md:justify-start gap-3">
+                                    <h3 class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">${tiket.ticketId}</h3>
+                                    <span class="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md">${tiket.items.length} Barang</span>
+                                </div>
+                                <div class="text-sm text-slate-500 mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                                    <span class="flex items-center gap-1">👤 ${tiket.requester}</span>
+                                    <span class="flex items-center gap-1">📍 ${tiket.area}</span>
+                                    <span class="flex items-center gap-1">📅 ${new Date(tiket.tglReq).toLocaleDateString('id-ID')}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center mt-4 md:mt-0 w-full md:w-auto justify-end border-t md:border-0 border-slate-100 pt-4 md:pt-0">
+                                <span id="${iconId}" class="text-slate-400 transform transition-transform duration-300">▼</span>
+                            </div>
+
+                        </div>
+                        
+                        <div id="${detailId}" class="hidden border-t border-slate-100 bg-slate-50">
+                            <div class="overflow-x-auto p-4 md:p-5">
+                                <table class="w-full text-left text-sm whitespace-nowrap bg-white border border-slate-200 rounded-lg overflow-hidden">
+                                    <thead class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Nama Barang</th>
+                                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Qty</th>
+                                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Vendor</th>
+                                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-right">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${itemsHTML}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // Fungsi Animasi Toggle Dropdown
+        function toggleDetail(detailId, iconId) {
+            const detailDiv = document.getElementById(detailId);
+            const iconSpan = document.getElementById(iconId);
+            
+            if (detailDiv.classList.contains('hidden')) {
+                detailDiv.classList.remove('hidden');
+                iconSpan.style.transform = 'rotate(180deg)'; // Putar ikon panah ke atas
+            } else {
+                detailDiv.classList.add('hidden');
+                iconSpan.style.transform = 'rotate(0deg)'; // Kembalikan ikon panah ke bawah
+            }
+        }
+
+        // Fungsi Pencarian (Search) yang memfilter data secara Real-Time
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase();
+            
+            // Filter array allTickets berdasarkan keyword
+            const filteredTickets = allTickets.filter(tiket => {
+                const matchId = tiket.ticketId.toLowerCase().includes(keyword);
+                const matchName = tiket.requester.toLowerCase().includes(keyword);
+                const matchArea = tiket.area.toLowerCase().includes(keyword);
+                
+                return matchId || matchName || matchArea;
+            });
+
+            // Render ulang tiket yang sudah difilter
+            renderTickets(filteredTickets);
+        });
+
+        // Panggil fungsi saat halaman pertama kali dibuka
+        fetchData();
+    </script>
+</body>
+</html>
