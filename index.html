@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Status Request Barang</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 p-4 md:p-8 min-h-screen font-sans">
 
     <div class="max-w-5xl mx-auto">
+        <!-- Header & Action Buttons -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Tracking Request</h1>
@@ -19,6 +21,7 @@
             </button>
         </div>
 
+        <!-- Search Bar -->
         <div class="mb-8">
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -29,6 +32,7 @@
             </div>
         </div>
 
+        <!-- Container untuk Tiket -->
         <div id="ticketContainer" class="space-y-4">
             <p class="text-center text-slate-500 py-10">Memuat data request...</p>
         </div>
@@ -36,7 +40,7 @@
 
     <script>
         // MASUKKAN URL APLIKASI WEB KAMU DI SINI
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnDCjJMFOx5RA8XSA_VLigDlJFl7Io5l4b5uO00QsoZUHCkLDDQJ4mT7hybVDG1C0P5g/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWqinFuSSMZbBlHKoeGmzG5-laWx45La3Fxto5h3sFWSBZzxKvHIHUT0aphMqZaRlurw/exec';
         
         // Variabel global untuk menyimpan data asli agar bisa difilter oleh fitur Search
         let allTickets = []; 
@@ -76,11 +80,24 @@
                     if(item.status.toLowerCase() === 'diproses') statusColor = 'bg-blue-100 text-blue-800 border-blue-200';
                     if(item.status.toLowerCase() === 'selesai') statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
 
+                    // ----------------------------------------------------
+                    // FORMAT ESTIMASI (HILANGKAN JAM JIKA FORMAT ISO)
+                    // ----------------------------------------------------
+                    let estimasiTampil = item.estimasi || '-';
+                    if (typeof estimasiTampil === 'string' && estimasiTampil.includes('T') && estimasiTampil.includes('Z')) {
+                        let parsedDate = new Date(estimasiTampil);
+                        if (!isNaN(parsedDate)) {
+                            // Mengubah ke format lokal (contoh: 14/11/2026)
+                            estimasiTampil = parsedDate.toLocaleDateString('id-ID'); 
+                        }
+                    }
+
                     itemsHTML += `
                         <tr class="border-b last:border-0 hover:bg-slate-50/50 transition-colors">
                             <td class="py-3 px-4 font-medium text-slate-700">${item.namaBarang}</td>
                             <td class="py-3 px-4 text-slate-600">${item.qty}</td>
                             <td class="py-3 px-4 text-slate-600">${item.vendor}</td>
+                            <td class="py-3 px-4 text-slate-600">${estimasiTampil}</td>
                             <td class="py-3 px-4 text-slate-600 text-right">
                                 <span class="px-2.5 py-1 text-[11px] uppercase tracking-wider font-bold rounded-full border ${statusColor}">
                                     ${item.status}
@@ -126,6 +143,7 @@
                                             <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Nama Barang</th>
                                             <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Qty</th>
                                             <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Vendor</th>
+                                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Estimasi</th>
                                             <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-right">Status</th>
                                         </tr>
                                     </thead>
