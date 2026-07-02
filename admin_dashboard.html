@@ -13,7 +13,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Admin Dashboard</h1>
-                <p class="text-slate-500 mt-1 text-sm">Kelola harga, vendor, status, dan validitas tiket.</p>
+                <p class="text-slate-500 mt-1 text-sm">Kelola harga, vendor, status, estimasi, dan validitas tiket.</p>
             </div>
             <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm text-sm font-medium transition-colors flex items-center gap-2">
                 <span>🔄</span> Segarkan Data
@@ -72,7 +72,7 @@
                             <td class="py-3 px-4 text-slate-600">${item.qty}</td>
                             <td class="py-3 px-4 text-slate-600">${item.harga !== '-' ? 'Rp '+item.harga : '-'}</td>
                             <td class="py-3 px-4 text-slate-600">${item.vendor}</td>
-                            <td class="py-3 px-4 text-slate-600">${item.estimasi}</td>
+                            <td class="py-3 px-4 text-slate-600">${item.estimasi || '-'}</td>
                             <td class="py-3 px-4 text-slate-600">
                                 <span class="px-2.5 py-1 text-[11px] uppercase tracking-wider font-bold rounded-full ${statusColor}">${item.status}</span>
                             </td>
@@ -182,19 +182,23 @@
             });
         }
 
-        // FUNGSI UNTUK MENGEDIT BARANG
-        function editItem(ticketId, namaBarang, currentHarga, currentVendor, currentStatus) {
+        // FUNGSI UNTUK MENGEDIT BARANG (Diperbaiki untuk Estimasi)
+        function editItem(ticketId, namaBarang, currentHarga, currentVendor, currentStatus, currentEstimasi) {
             Swal.fire({
                 title: `Edit ${namaBarang}`,
                 html: `
                     <div class="text-left space-y-3 mt-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700">Harga Satuan</label>
-                            <input id="swal-harga" type="number" class="w-full p-2 border rounded-md" value="${currentHarga !== '-' ? currentHarga : ''}" placeholder="Cth: 50000">
+                            <input id="swal-harga" type="number" class="w-full p-2 border rounded-md" value="${currentHarga !== '-' && currentHarga !== 'undefined' ? currentHarga : ''}" placeholder="Cth: 50000">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700">Nama Vendor</label>
-                            <input id="swal-vendor" type="text" class="w-full p-2 border rounded-md" value="${currentVendor !== '-' ? currentVendor : ''}" placeholder="Cth: Toko Makmur">
+                            <input id="swal-vendor" type="text" class="w-full p-2 border rounded-md" value="${currentVendor !== '-' && currentVendor !== 'undefined' ? currentVendor : ''}" placeholder="Cth: Toko Makmur">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700">Estimasi Tiba / Selesai</label>
+                            <input id="swal-estimasi" type="text" class="w-full p-2 border rounded-md" value="${currentEstimasi !== '-' && currentEstimasi !== 'undefined' ? currentEstimasi : ''}" placeholder="Cth: 2 Hari lagi / 15 Nov">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700">Status Barang</label>
@@ -213,6 +217,7 @@
                     return {
                         harga: document.getElementById('swal-harga').value || '-',
                         vendor: document.getElementById('swal-vendor').value || '-',
+                        estimasi: document.getElementById('swal-estimasi').value || '-',
                         status: document.getElementById('swal-status').value
                     }
                 }
@@ -226,6 +231,7 @@
                         namaBarang: namaBarang,
                         harga: result.value.harga,
                         vendor: result.value.vendor,
+                        estimasi: result.value.estimasi,
                         status: result.value.status
                     };
 
