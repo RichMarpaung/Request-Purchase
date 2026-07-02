@@ -72,11 +72,12 @@
                             <td class="py-3 px-4 text-slate-600">${item.qty}</td>
                             <td class="py-3 px-4 text-slate-600">${item.harga !== '-' ? 'Rp '+item.harga : '-'}</td>
                             <td class="py-3 px-4 text-slate-600">${item.vendor}</td>
+                            <td class="py-3 px-4 text-slate-600">${item.estimasi}</td>
                             <td class="py-3 px-4 text-slate-600">
                                 <span class="px-2.5 py-1 text-[11px] uppercase tracking-wider font-bold rounded-full ${statusColor}">${item.status}</span>
                             </td>
                             <td class="py-3 px-4 text-right">
-                                <button onclick="editItem('${tiket.ticketId}', '${item.namaBarang}', '${item.harga}', '${item.vendor}', '${item.status}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-3 py-1 rounded-md transition-colors">✏️ Edit</button>
+                                <button onclick="editItem('${tiket.ticketId}', '${item.namaBarang}', '${item.harga}', '${item.vendor}', '${item.status}','${item.estimasi}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-3 py-1 rounded-md transition-colors">✏️ Edit</button>
                             </td>
                         </tr>
                     `;
@@ -119,6 +120,7 @@
                                             <th class="py-3 px-4 font-semibold text-xs uppercase">Qty</th>
                                             <th class="py-3 px-4 font-semibold text-xs uppercase">Harga</th>
                                             <th class="py-3 px-4 font-semibold text-xs uppercase">Vendor</th>
+                                            <th class="py-3 px-4 font-semibold text-xs uppercase">Estimasi</th>
                                             <th class="py-3 px-4 font-semibold text-xs uppercase">Status</th>
                                             <th class="py-3 px-4 font-semibold text-xs uppercase text-right">Aksi</th>
                                         </tr>
