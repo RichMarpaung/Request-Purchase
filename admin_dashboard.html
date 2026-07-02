@@ -66,18 +66,30 @@
                     if(item.status.toLowerCase() === 'diproses') statusColor = 'bg-blue-100 text-blue-800';
                     if(item.status.toLowerCase() === 'selesai') statusColor = 'bg-emerald-100 text-emerald-800';
 
+                    // ----------------------------------------------------
+                    // PERBAIKAN FORMAT ESTIMASI (HILANGKAN JAM)
+                    // ----------------------------------------------------
+                    let estimasiTampil = item.estimasi || '-';
+                    if (typeof estimasiTampil === 'string' && estimasiTampil.includes('T') && estimasiTampil.includes('Z')) {
+                        let parsedDate = new Date(estimasiTampil);
+                        if (!isNaN(parsedDate)) {
+                            // Mengubah ke format lokal (contoh: 14/11/2026)
+                            estimasiTampil = parsedDate.toLocaleDateString('id-ID'); 
+                        }
+                    }
+
                     itemsHTML += `
                         <tr class="border-b last:border-0 hover:bg-slate-50 transition-colors">
                             <td class="py-3 px-4 font-medium text-slate-700">${item.namaBarang}</td>
                             <td class="py-3 px-4 text-slate-600">${item.qty}</td>
                             <td class="py-3 px-4 text-slate-600">${item.harga !== '-' ? 'Rp '+item.harga : '-'}</td>
                             <td class="py-3 px-4 text-slate-600">${item.vendor}</td>
-                            <td class="py-3 px-4 text-slate-600">${item.estimasi || '-'}</td>
+                            <td class="py-3 px-4 text-slate-600">${estimasiTampil}</td>
                             <td class="py-3 px-4 text-slate-600">
                                 <span class="px-2.5 py-1 text-[11px] uppercase tracking-wider font-bold rounded-full ${statusColor}">${item.status}</span>
                             </td>
                             <td class="py-3 px-4 text-right">
-                                <button onclick="editItem('${tiket.ticketId}', '${item.namaBarang}', '${item.harga}', '${item.vendor}', '${item.status}','${item.estimasi}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-3 py-1 rounded-md transition-colors">✏️ Edit</button>
+                                <button onclick="editItem('${tiket.ticketId}', '${item.namaBarang}', '${item.harga}', '${item.vendor}', '${item.status}','${estimasiTampil}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-3 py-1 rounded-md transition-colors">✏️ Edit</button>
                             </td>
                         </tr>
                     `;
@@ -182,7 +194,7 @@
             });
         }
 
-        // FUNGSI UNTUK MENGEDIT BARANG (Diperbaiki untuk Estimasi)
+        // FUNGSI UNTUK MENGEDIT BARANG
         function editItem(ticketId, namaBarang, currentHarga, currentVendor, currentStatus, currentEstimasi) {
             Swal.fire({
                 title: `Edit ${namaBarang}`,
@@ -198,7 +210,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700">Estimasi Tiba / Selesai</label>
-                            <input id="swal-estimasi" type="text" class="w-full p-2 border rounded-md" value="${currentEstimasi !== '-' && currentEstimasi !== 'undefined' ? currentEstimasi : ''}" placeholder="Cth: 2 Hari lagi / 15 Nov">
+                            <input id="swal-estimasi" type="text" class="w-full p-2 border rounded-md" value="${currentEstimasi !== '-' && currentEstimasi !== 'undefined' ? currentEstimasi : ''}" placeholder="Cth: 14/11/2026 atau 2 Hari lagi">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700">Status Barang</label>
